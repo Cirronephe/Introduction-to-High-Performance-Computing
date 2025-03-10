@@ -1,0 +1,59 @@
+*
+* Visual Studio Code Server
+*
+* By using the software, you agree to
+* the Visual Studio Code Server License Terms (https://aka.ms/vscode-server-license) and
+* the Microsoft Privacy Statement (https://privacy.microsoft.com/en-US/privacystatement).
+*
+Server bound to /tmp/code-a9f28158-3af7-476f-9cdb-2e222b7970e1
+Extension host agent listening on /tmp/code-a9f28158-3af7-476f-9cdb-2e222b7970e1
+
+[20:19:25] 
+
+
+
+
+[20:19:25] Extension host agent started.
+[20:19:25] Started initializing default profile extensions in extensions installation folder. file:///home/course/hpc/users/2023010828/.vscode-server/extensions
+[20:19:25] [<unknown>][cacbbcc2][ManagementConnection] New connection established.
+[20:19:25] [<unknown>][393f10f1][ExtensionHostConnection] New connection established.
+[20:19:26] [<unknown>][393f10f1][ExtensionHostConnection] <1834452> Launched Extension Host Process.
+[20:19:31] Completed initializing default profile extensions in extensions installation folder. file:///home/course/hpc/users/2023010828/.vscode-server/extensions
+[20:19:37] [<unknown>][cacbbcc2][ManagementConnection] The client has disconnected gracefully, so the connection will be disposed.
+[20:19:37] [<unknown>][393f10f1][ExtensionHostConnection] <1834452> Extension Host Process exited with code: 0, signal: null.
+Cancelling previous shutdown timeout
+[20:19:37] Cancelling previous shutdown timeout
+Last EH closed, waiting before shutting down
+[20:19:37] Last EH closed, waiting before shutting down
+[20:19:52] [<unknown>][2a068f8f][ManagementConnection] New connection established.
+[20:19:52] [<unknown>][987e18ac][ExtensionHostConnection] New connection established.
+[20:19:52] [<unknown>][987e18ac][ExtensionHostConnection] <1835029> Launched Extension Host Process.
+rejected promise not handled within 1 second: CodeExpectedError: Could not find pty 9 on pty host
+stack trace: CodeExpectedError: Could not find pty 9 on pty host
+    at I.W (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:45:12275)
+    at I.updateTitle (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:45:7722)
+    at O.s.<computed> (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:45:2962)
+    at Object.call (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:28:4204)
+    at el.s (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:26:80918)
+    at el.q (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:26:80441)
+    at ds.value (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:26:79843)
+    at x.B (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:26:2373)
+    at x.fire (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:26:2591)
+    at process.C (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:24:29877)
+    at process.emit (node:events:518:28)
+    at emit (node:internal/child_process:950:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:83:21)
+[20:19:54] Error [CodeExpectedError]: Could not find pty 9 on pty host
+    at I.W (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:45:12275)
+    at I.updateTitle (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:45:7722)
+    at O.s.<computed> (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:45:2962)
+    at Object.call (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:28:4204)
+    at el.s (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:26:80918)
+    at el.q (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:26:80441)
+    at ds.value (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:26:79843)
+    at x.B (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:26:2373)
+    at x.fire (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:26:2591)
+    at process.C (file:///home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/server/out/vs/platform/terminal/node/ptyHostMain.js:24:29877)
+    at process.emit (node:events:518:28)
+    at emit (node:internal/child_process:950:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:83:21)

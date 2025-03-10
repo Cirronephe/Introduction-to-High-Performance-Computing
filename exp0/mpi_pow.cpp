@@ -6,7 +6,8 @@
 
 void pow_a(int *a, int *b, int n, int m, int comm_sz /* 总进程数 */) {
     // TODO: 对这个进程拥有的数据计算 b[i] = a[i]^m
-    for (int i = 0; i < n; i++) {
+    int local_n = n / comm_sz;
+    for (int i = 0; i < local_n; i++) {
         int x = 1;
         for (int j = 0; j < m; j++)
             x *= a[i];

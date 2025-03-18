@@ -1,0 +1,10 @@
+.cache/
+.spack/
+.vscode-server/
+.bash_history
+.viminfo
+.wget-hsts
+.profile
+.bashrc
+.bash_logout
+.lesshst

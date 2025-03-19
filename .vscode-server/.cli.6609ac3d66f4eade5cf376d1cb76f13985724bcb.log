@@ -1,4 +1,0 @@
-Listening on 127.0.0.1:41971
-[2025-03-10 20:19:52] info Disposed of connection to running server.
-[2025-03-10 20:19:52] info Checking /home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/log.txt and /home/course/hpc/users/2023010828/.vscode-server/cli/servers/Stable-6609ac3d66f4eade5cf376d1cb76f13985724bcb/pid.txt for a running server...
-[2025-03-10 20:19:52] info Found running server (pid=1834269)

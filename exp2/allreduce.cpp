@@ -12,7 +12,40 @@ namespace ch = std::chrono;
 
 void Ring_Allreduce(void* sendbuf, void* recvbuf, int n, MPI_Comm comm, int comm_sz, int my_rank)
 {
-    //TODO
+    MPI_Request requests[2];
+    MPI_Status statuses[2];
+    int grp_sz = n / comm_sz, source = (my_rank - 1 + comm_sz) % comm_sz, dest = (my_rank + 1) % comm_sz;
+
+    for (int i = 0; i < comm_sz - 1; ++i) {
+        int recv_blk = (my_rank - 1 - i + comm_sz) % comm_sz;
+        float *rbuf = (float *)recvbuf + recv_blk * grp_sz;
+        MPI_Irecv(rbuf, grp_sz, MPI_FLOAT, source, 0, comm, &requests[0]);
+
+        int send_blk = (my_rank - i + comm_sz) % comm_sz;
+        float *sbuf = (float *)sendbuf + send_blk * grp_sz;
+        MPI_Isend(sbuf, grp_sz, MPI_FLOAT, dest, 0, comm, &requests[1]);
+        
+        MPI_Waitall(2, requests, statuses);
+        
+        sbuf = (float *)sendbuf + recv_blk * grp_sz;
+        for (int j = 0; j < grp_sz; ++j)
+           sbuf[j] += rbuf[j];
+    }
+
+    for (int i = -1; i < comm_sz - 1; ++i) {
+        int recv_blk = (my_rank - 1 - i + comm_sz) % comm_sz;
+        float *rbuf = (float *)recvbuf + recv_blk * grp_sz;
+        MPI_Irecv(rbuf, grp_sz, MPI_FLOAT, source, 1, comm, &requests[0]);
+
+        int send_blk = (my_rank - i + comm_sz) % comm_sz;
+        float *sbuf = (float *)sendbuf + send_blk * grp_sz;
+        MPI_Isend(sbuf, grp_sz, MPI_FLOAT, dest, 1, comm, &requests[1]);
+        
+        MPI_Waitall(2, requests, statuses);
+        
+        sbuf = (float *)sendbuf + recv_blk * grp_sz;
+        memcpy(sbuf, rbuf, grp_sz * sizeof(float));
+    }
 }
 
 

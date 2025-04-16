@@ -12,7 +12,7 @@ endif
 generate: generate.cpp
 	g++ $(CFLAGS) $^ -o $@ 
 
-odd_even_sort: main.cpp worker.cpp odd_even_sort_1.cpp
+odd_even_sort: main.cpp worker.cpp odd_even_sort.cpp
 	mpicxx -g $(CFLAGS) $^ -o $@
 
 clean:

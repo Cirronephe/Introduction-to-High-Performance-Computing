@@ -17,7 +17,7 @@ void Worker::sort() {
   int obj;
   bool flag;
   float *recv_data = new float[block_len], *tmp = new float[block_len * 2];
-  int cnt = 0;
+
   for (int tag = rank & 1;; tag ^= 1) {
     if (rank != nprocs - 1 && !tag) {
       obj = rank + 1;
@@ -79,7 +79,7 @@ void Worker::sort() {
 
     // if (!flag) break;
 
-    if (++cnt == nprocs - 1) break;
+    if (++cnt == nprocs) break;
   }
   // you can use variables in class Worker: n, nprocs, rank, block_len, data
 }

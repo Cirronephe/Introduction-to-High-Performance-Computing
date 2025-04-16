@@ -1,5 +1,8 @@
 .cache/
+.dotnet/
+.nv/
 .spack/
+.vscode/
 .vscode-server/
 .bash_history
 .viminfo
@@ -8,4 +11,3 @@
 .bashrc
 .bash_logout
 .lesshst
-.dotnet/

@@ -26,7 +26,7 @@ void Worker::sort() {
 
   std::sort(data, data + block_len);
 
-  int left = rank - 1, right = rank + 1, block_size = ceiling(n, nprocs), recv_count, bias = 0;
+  int j = 0, left = rank - 1, right = rank + 1, block_size = ceiling(n, nprocs), recv_count, bias = 0;
   bool flag;
   float maximum, minimum;
   float *recv_data = new float[block_size], *tmp[2];
@@ -50,17 +50,17 @@ void Worker::sort() {
         flag = (maximum - minimum) > EPS;
         
         if (flag) {
-          MPI_Sendrecv(tmp[i & 1] + bias, block_len, MPI_FLOAT, right, 0,
+          MPI_Sendrecv(tmp[j] + bias, block_len, MPI_FLOAT, right, 0,
                        recv_data, block_size, MPI_FLOAT, right, 0,
                        MPI_COMM_WORLD, &status);
           MPI_Get_count(&status, MPI_FLOAT, &recv_count);
 
-          minimum = std::min(tmp[i & 1][bias + 0], recv_data[0]);
+          minimum = std::min(tmp[j][bias + 0], recv_data[0]);
         } else {
-          minimum = tmp[i & 1][bias + 0];
+          minimum = tmp[j][bias + 0];
         }
       } else {
-        minimum = tmp[i & 1][bias + 0];
+        minimum = tmp[j][bias + 0];
       }
       
       if (i != nprocs - 1 && valid(left)) {
@@ -79,17 +79,17 @@ void Worker::sort() {
         flag = (maximum - minimum) > EPS;
         
         if (flag) {
-          MPI_Sendrecv(tmp[i & 1] + bias, block_len, MPI_FLOAT, left, 0,
+          MPI_Sendrecv(tmp[j] + bias, block_len, MPI_FLOAT, left, 0,
                        recv_data, block_size, MPI_FLOAT, left, 0,
                        MPI_COMM_WORLD, &status);
           MPI_Get_count(&status, MPI_FLOAT, &recv_count);
 
-          maximum = std::max(tmp[i & 1][bias + block_len - 1], recv_data[recv_count - 1]);
+          maximum = std::max(tmp[j][bias + block_len - 1], recv_data[recv_count - 1]);
         } else {
-          maximum = tmp[i & 1][bias + block_len - 1];
+          maximum = tmp[j][bias + block_len - 1];
         }
       } else {
-        maximum = tmp[i & 1][bias + block_len - 1];
+        maximum = tmp[j][bias + block_len - 1];
       }
 
       if (i != nprocs - 1 && valid(right)) {
@@ -99,11 +99,12 @@ void Worker::sort() {
     }
 
     if (flag) {
-      merge_split(tmp[i & 1] + bias, recv_data, tmp[(i & 1) ^ 1], block_len, recv_count, tag, bias);
+      merge_split(tmp[j] + bias, recv_data, tmp[j ^ 1], block_len, recv_count, tag, bias);
+      j ^= 1;
     }
   }
 
-  memcpy(data, tmp[nprocs & 1] + bias, block_len * sizeof(float));
+  memcpy(data, tmp[j] + bias, block_len * sizeof(float));
 
   delete[] recv_data;
   delete[] tmp[0];

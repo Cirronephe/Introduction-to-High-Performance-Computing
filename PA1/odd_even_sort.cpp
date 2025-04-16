@@ -31,6 +31,8 @@ void half_merge(float *data, float *recv_data, float *tmp, int len, int recv_len
 }
 
 void Worker::sort() {
+  if (out_of_range) return;
+
   MPI_Request requests[2];
   MPI_Status status, statuses[2];
 
@@ -42,6 +44,8 @@ void Worker::sort() {
   float *recv_data = new float[block_size], *tmp[2];
   tmp[0] = new float[block_len];
   tmp[1] = new float[block_len];
+
+  if (block_size * (nprocs - 1) >= int(n)) --nprocs;
 
   memcpy(tmp[0], data, block_len * sizeof(float));
 

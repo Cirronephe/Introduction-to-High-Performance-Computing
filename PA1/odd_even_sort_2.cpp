@@ -54,24 +54,7 @@ void Worker::sort() {
 
       if (flag) {
         int count;
-        MPI_Irecv(recv_data, block_len, MPI_FLOAT, obj, 0, MPI_COMM_WORLD, &request);
-
-        rep(i, cnts[1], nprocs - 1) {
-          ++cnts[0];
-          MPI_Irecv(&recv_flag, 1, MPI_C_BOOL, source, 1, MPI_COMM_WORLD, &requests[0]);
-          MPI_Isend(&flag, 1, MPI_C_BOOL, dest, 1, MPI_COMM_WORLD, &requests[1]);
-          
-          MPI_Waitall(2, requests, statuses);
-
-          flag |= recv_flag;
-          ++cnts[1];
-
-          int test_flag;
-          MPI_Test(&request, &test_flag, &status);
-
-          if (test_flag) break;
-        }
-
+        MPI_Recv(recv_data, block_len, MPI_FLOAT, obj, 0, MPI_COMM_WORLD, &status);
         MPI_Get_count(&status, MPI_FLOAT, &count);
 
         for (int i = 0, j = 0, k = 0; i < int(block_len) || j < count;) {
@@ -80,6 +63,7 @@ void Worker::sort() {
           } else {
             tmp[k++] = recv_data[j++];
           }
+          pass(nprocs, source, dest, requests, statuses, cnts, flag, recv_flag);
         }
 
         MPI_Isend(tmp + block_len, count, MPI_FLOAT, obj, 0, MPI_COMM_WORLD, &request);
@@ -99,27 +83,12 @@ void Worker::sort() {
           int mid = (l + r + 1) >> 1;
           if ((data[mid] - maximum) < -EPS) l = mid;
           else r = mid - 1;
+          pass(nprocs, source, dest, requests, statuses, cnts, flag, recv_flag);
         }
 
         int count = r + 1;
-        MPI_Isend(data, count, MPI_FLOAT, obj, 0, MPI_COMM_WORLD, &request);
+        MPI_Send(data, count, MPI_FLOAT, obj, 0, MPI_COMM_WORLD);
         
-        rep(i, cnts[1], nprocs - 1) {
-          ++cnts[0];
-          MPI_Irecv(&recv_flag, 1, MPI_C_BOOL, source, 1, MPI_COMM_WORLD, &requests[0]);
-          MPI_Isend(&flag, 1, MPI_C_BOOL, dest, 1, MPI_COMM_WORLD, &requests[1]);
-          
-          MPI_Waitall(2, requests, statuses);
-
-          flag |= recv_flag;
-          ++cnts[1];
-
-          int test_flag;
-          MPI_Test(&request, &test_flag, &status);
-
-          if (test_flag) break;
-        }
-
         MPI_Irecv(data, count, MPI_FLOAT, obj, 0, MPI_COMM_WORLD, &request);
       }
     }

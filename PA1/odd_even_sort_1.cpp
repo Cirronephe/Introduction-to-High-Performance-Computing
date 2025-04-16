@@ -9,15 +9,15 @@
 #include "worker.h"
 
 void Worker::sort() {
-  MPI_Request request, requests[2];
-  MPI_Status status, statuses[2];
+  MPI_Request request;
+  MPI_Status status;
 
   std::sort(data, data + block_len);
 
   int obj;
-  bool flag, recv_flag;
+  bool flag;
   float *recv_data = new float[block_len], *tmp = new float[block_len * 2];
-
+  int cnt = 0;
   for (int tag = rank & 1;; tag ^= 1) {
     if (rank != nprocs - 1 && !tag) {
       obj = rank + 1;
@@ -64,20 +64,22 @@ void Worker::sort() {
       }
     }
 
-    int source = (rank - 1 + nprocs) % nprocs, dest = (rank + 1) % nprocs;
+    // int source = (rank - 1 + nprocs) % nprocs, dest = (rank + 1) % nprocs;
 
-    rep(i, 0, nprocs - 1) {
-      MPI_Irecv(&recv_flag, 1, MPI_C_BOOL, source, 0, MPI_COMM_WORLD, &requests[0]);
-      MPI_Isend(&flag, 1, MPI_C_BOOL, dest, 0, MPI_COMM_WORLD, &requests[1]);
+    // rep(i, 0, nprocs - 1) {
+    //   MPI_Irecv(&recv_flag, 1, MPI_C_BOOL, source, 0, MPI_COMM_WORLD, &requests[0]);
+    //   MPI_Isend(&flag, 1, MPI_C_BOOL, dest, 0, MPI_COMM_WORLD, &requests[1]);
       
-      MPI_Waitall(2, requests, statuses);
+    //   MPI_Waitall(2, requests, statuses);
     
-      flag |= recv_flag;
-    }
+    //   flag |= recv_flag;
+    // }
 
     if (request != NULL) MPI_Wait(&request, &status);
 
-    if (!flag) break;
+    // if (!flag) break;
+
+    if (++cnt == nprocs - 1) break;
   }
   // you can use variables in class Worker: n, nprocs, rank, block_len, data
 }

@@ -3,26 +3,31 @@
 #include <cstdio>
 #include <cstdlib>
 #include <mpi.h>
+#include <limits>
 #define rep(i, a, b) for (int i = (a); i < (b); ++i)
-#define EPS 1e-7
+#define EPS 1e-6
 
 #include "worker.h"
 
 void Worker::sort() {
   MPI_Request request, requests[2];
   MPI_Status status, statuses[2];
-
-  std::sort(data, data + block_len);
-
   int obj;
   bool flag, recv_flag;
   float *recv_data = new float[block_len], *tmp = new float[block_len * 2];
-
+ 
   for (int tag = rank & 1;; tag ^= 1) {
     if (rank != nprocs - 1 && !tag) {
       obj = rank + 1;
-      float maximum = data[block_len - 1];
-      MPI_Send(&maximum, 1, MPI_FLOAT, obj, 0, MPI_COMM_WORLD);
+
+      float maximum = -std::numeric_limits<float>::infinity();
+      rep(i, 0, int(block_len)) {
+        maximum = std::max(maximum, data[i]);
+      }
+      MPI_Isend(&maximum, 1, MPI_FLOAT, obj, 0, MPI_COMM_WORLD, &request);
+
+      std::sort(data, data + block_len);
+      
       MPI_Recv(&flag, 1, MPI_C_BOOL, obj, 0, MPI_COMM_WORLD, &status);
       
       if (flag) {
@@ -31,7 +36,7 @@ void Worker::sort() {
         MPI_Get_count(&status, MPI_FLOAT, &count);
 
         for (int i = 0, j = 0, k = 0; i < int(block_len) || j < count;) {
-          if ((j >= count) || (i < int(block_len) && (data[i] - recv_data[j]) < EPS)) {
+          if ((j >= count) || (i < int(block_len) && data[i] <= recv_data[j])) {
             tmp[k++] = data[i++];
           } else {
             tmp[k++] = recv_data[j++];
@@ -44,8 +49,16 @@ void Worker::sort() {
       }
     } else if (rank && tag) {
       obj = rank - 1;
-      float minimum = data[0], maximum;
-      MPI_Recv(&maximum, 1, MPI_FLOAT, obj, 0, MPI_COMM_WORLD, &status);
+
+      float minimum = std::numeric_limits<float>::infinity(), maximum;
+      rep(i, 0, int(block_len)) {
+        minimum = std::min(minimum, data[i]);
+      }
+      MPI_Irecv(&maximum, 1, MPI_FLOAT, obj, 0, MPI_COMM_WORLD, &request);
+
+      std::sort(data, data + block_len);
+      
+      MPI_Wait(&request, &status);
       flag = (maximum - minimum) > EPS;
       MPI_Isend(&flag, 1, MPI_C_BOOL, obj, 0, MPI_COMM_WORLD, &request);
       
@@ -75,7 +88,7 @@ void Worker::sort() {
       flag |= recv_flag;
     }
 
-    if (request != NULL) MPI_Wait(&request, &status);
+    MPI_Wait(&request, &status);
 
     if (!flag) break;
   }

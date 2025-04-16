@@ -16,4 +16,4 @@ else
     num_procs=56
 fi
 
-srun -n $num_procs $target_program $num_elements $input_file $*
+srun -n $num_procs --cpu-bind sockets $target_program $num_elements $input_file $*

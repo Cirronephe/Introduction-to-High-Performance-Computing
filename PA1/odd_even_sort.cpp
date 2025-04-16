@@ -10,7 +10,7 @@
 
 #include "worker.h"
 
-void merge_split(float *data, float *recv_data, float *tmp, int len, int recv_len, int tag) {
+void half_merge(float *data, float *recv_data, float *tmp, int len, int recv_len, int tag) {
   if (!tag) {
     for (int i = 0, j = 0, k = 0; k < len;) {
       if ((j == recv_len) || (i < len && (data[i] - recv_data[j]) < EPS)) {
@@ -60,7 +60,14 @@ void Worker::sort() {
         flag = (maximum - minimum) > EPS;
         
         if (flag) {
-          MPI_Sendrecv(tmp[j], block_len, MPI_FLOAT, right, 0,
+          int l = 0, r = block_len - 1;
+          while (l < r) {
+            int mid = (l + r) >> 1;
+            if ((tmp[j][mid] - minimum) > EPS) r = mid;
+            else l = mid + 1;
+          }
+
+          MPI_Sendrecv(tmp[j] + l, block_len - l, MPI_FLOAT, right, 0,
                        recv_data, block_size, MPI_FLOAT, right, 0,
                        MPI_COMM_WORLD, &status);
           MPI_Get_count(&status, MPI_FLOAT, &recv_count);
@@ -89,7 +96,14 @@ void Worker::sort() {
         flag = (maximum - minimum) > EPS;
         
         if (flag) {
-          MPI_Sendrecv(tmp[j], block_len, MPI_FLOAT, left, 0,
+          int l = 0, r = block_len - 1;
+          while (l < r) {
+            int mid = (l + r + 1) >> 1;
+            if ((tmp[j][mid] - maximum) < -EPS) l = mid;
+            else r = mid - 1;
+          }
+
+          MPI_Sendrecv(tmp[j], r + 1, MPI_FLOAT, left, 0,
                        recv_data, block_size, MPI_FLOAT, left, 0,
                        MPI_COMM_WORLD, &status);
           MPI_Get_count(&status, MPI_FLOAT, &recv_count);
@@ -109,7 +123,7 @@ void Worker::sort() {
     }
  
     if (flag) {
-      merge_split(tmp[j], recv_data, tmp[j ^ 1], block_len, recv_count, tag);
+      half_merge(tmp[j], recv_data, tmp[j ^ 1], block_len, recv_count, tag);
       j ^= 1;
     }
   }

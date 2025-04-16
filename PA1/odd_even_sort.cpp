@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <mpi.h>
 #define rep(i, a, b) for (int i = (a); i < (b); ++i)
 #define EPS 1e-7
@@ -9,15 +10,15 @@
 
 #include "worker.h"
 
-void merge_split(float *data, float *recv_data, float *tmp, int len, int recv_len, int tag) {
+void merge_split(float *data, float *recv_data, float *tmp, int len, int recv_len, int tag, int &bias) {
   std::merge(data, data + len, recv_data, recv_data + recv_len, tmp);
 
   if (!tag) {
-    memcpy(data, tmp, len * sizeof(float));
+    bias = 0;
   } else {
-    memcpy(data, tmp + recv_len, len * sizeof(float));
+    bias = recv_len;
   }
-}
+} 
 
 void Worker::sort() {
   MPI_Request requests[2];
@@ -25,10 +26,14 @@ void Worker::sort() {
 
   std::sort(data, data + block_len);
 
-  int left = rank - 1, right = rank + 1, block_size = ceiling(n, nprocs), recv_count;
+  int left = rank - 1, right = rank + 1, block_size = ceiling(n, nprocs), recv_count, bias = 0;
   bool flag;
   float maximum, minimum;
-  float *recv_data = new float[block_size], *tmp = new float[block_size + block_len];
+  float *recv_data = new float[block_size], *tmp[2];
+  tmp[0] = new float[block_size + block_len];
+  tmp[1] = new float[block_size + block_len];
+
+  memcpy(tmp[0], data, block_len * sizeof(float));
 
   for (int i = 0, tag = rank & 1; i < nprocs; ++i, tag ^= 1) {
     flag = false;
@@ -45,17 +50,17 @@ void Worker::sort() {
         flag = (maximum - minimum) > EPS;
         
         if (flag) {
-          MPI_Sendrecv(data, block_len, MPI_FLOAT, right, 0,
-                      recv_data, block_size, MPI_FLOAT, right, 0,
-                      MPI_COMM_WORLD, &status);
+          MPI_Sendrecv(tmp[i & 1] + bias, block_len, MPI_FLOAT, right, 0,
+                       recv_data, block_size, MPI_FLOAT, right, 0,
+                       MPI_COMM_WORLD, &status);
           MPI_Get_count(&status, MPI_FLOAT, &recv_count);
 
-          minimum = std::min(data[0], recv_data[0]);
+          minimum = std::min(tmp[i & 1][bias + 0], recv_data[0]);
         } else {
-          minimum = data[0];
+          minimum = tmp[i & 1][bias + 0];
         }
       } else {
-        minimum = data[0];
+        minimum = tmp[i & 1][bias + 0];
       }
       
       if (i != nprocs - 1 && valid(left)) {
@@ -74,17 +79,17 @@ void Worker::sort() {
         flag = (maximum - minimum) > EPS;
         
         if (flag) {
-          MPI_Sendrecv(data, block_len, MPI_FLOAT, left, 0,
-                      recv_data, block_size, MPI_FLOAT, left, 0,
-                      MPI_COMM_WORLD, &status);
+          MPI_Sendrecv(tmp[i & 1] + bias, block_len, MPI_FLOAT, left, 0,
+                       recv_data, block_size, MPI_FLOAT, left, 0,
+                       MPI_COMM_WORLD, &status);
           MPI_Get_count(&status, MPI_FLOAT, &recv_count);
 
-          maximum = std::max(data[block_len - 1], recv_data[recv_count - 1]);
+          maximum = std::max(tmp[i & 1][bias + block_len - 1], recv_data[recv_count - 1]);
         } else {
-          maximum = data[block_len - 1];
+          maximum = tmp[i & 1][bias + block_len - 1];
         }
       } else {
-        maximum = data[block_len - 1];
+        maximum = tmp[i & 1][bias + block_len - 1];
       }
 
       if (i != nprocs - 1 && valid(right)) {
@@ -94,8 +99,13 @@ void Worker::sort() {
     }
 
     if (flag) {
-      merge_split(data, recv_data, tmp, block_len, recv_count, tag);
+      merge_split(tmp[i & 1] + bias, recv_data, tmp[(i & 1) ^ 1], block_len, recv_count, tag, bias);
     }
   }
-  // you can use variables in class Worker: n, nprocs, rank, block_len, data
+
+  memcpy(data, tmp[nprocs & 1] + bias, block_len * sizeof(float));
+
+  delete[] recv_data;
+  delete[] tmp[0];
+  delete[] tmp[1];
 }

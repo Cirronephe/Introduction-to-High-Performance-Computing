@@ -17,7 +17,7 @@ void Worker::sort() {
   int obj;
   bool flag;
   float *recv_data = new float[block_len], *tmp = new float[block_len * 2];
-
+  int cnt = 0;
   for (int tag = rank & 1;; tag ^= 1) {
     if (rank != nprocs - 1 && !tag) {
       obj = rank + 1;
@@ -63,7 +63,7 @@ void Worker::sort() {
         MPI_Irecv(data, count, MPI_FLOAT, obj, 0, MPI_COMM_WORLD, &request);
       }
     }
-
+ 
     // int source = (rank - 1 + nprocs) % nprocs, dest = (rank + 1) % nprocs;
 
     // rep(i, 0, nprocs - 1) {

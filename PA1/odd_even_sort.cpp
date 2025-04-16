@@ -8,59 +8,60 @@
 
 #include "worker.h"
 
+void merge_split(float *data, float *recv_data, float *tmp, int len, int recv_len, bool flag) {
+  std::merge(data, data + len, recv_data, recv_data + recv_len, tmp);
+
+  if (!flag) {
+    memcpy(data, tmp, len * sizeof(float));
+  } else {
+    memcpy(data, tmp + recv_len, len * sizeof(float));
+  }
+}
+
 void Worker::sort() {
   MPI_Request request;
   MPI_Status status;
 
   std::sort(data, data + block_len);
 
-  int obj;
+  int obj, block_size = ceiling(n, nprocs);
   bool flag;
-  float *recv_data = new float[block_len], *tmp = new float[block_len * 2];
+  float *recv_data = new float[block_size], *tmp = new float[block_size + block_len];
 
   for (int i = 0, tag = rank & 1; i < nprocs; ++i, tag ^= 1) {
     if (rank != nprocs - 1 && !tag) {
       obj = rank + 1;
-      float maximum = data[block_len - 1];
-      MPI_Send(&maximum, 1, MPI_FLOAT, obj, 0, MPI_COMM_WORLD);
-      MPI_Recv(&flag, 1, MPI_C_BOOL, obj, 0, MPI_COMM_WORLD, &status);
+      float maximum = data[block_len - 1], minimum;
+      MPI_Sendrecv(&maximum, 1, MPI_FLOAT, obj, 0, 
+                   &minimum, 1, MPI_FLOAT, obj, 0,
+                   MPI_COMM_WORLD, &status);
+      flag = (maximum - minimum) > EPS;
       
       if (flag) {
-        int count;
-        MPI_Recv(recv_data, block_len, MPI_FLOAT, obj, 0, MPI_COMM_WORLD, &status);
-        MPI_Get_count(&status, MPI_FLOAT, &count);
+        MPI_Sendrecv(data, block_len, MPI_FLOAT, obj, 0,
+                     recv_data, block_size, MPI_FLOAT, obj, 0,
+                     MPI_COMM_WORLD, &status);
+        int recv_count;
+        MPI_Get_count(&status, MPI_FLOAT, &recv_count);
 
-        for (int i = 0, j = 0, k = 0; i < int(block_len) || j < count;) {
-          if ((j >= count) || (i < int(block_len) && (data[i] - recv_data[j]) < EPS)) {
-            tmp[k++] = data[i++];
-          } else {
-            tmp[k++] = recv_data[j++];
-          }
-        }
-
-        MPI_Isend(tmp + block_len, count, MPI_FLOAT, obj, 0, MPI_COMM_WORLD, &request);
-
-        memcpy(data, tmp, block_len * sizeof(float));
+        merge_split(data, recv_data, tmp, block_len, recv_count, false);
       }
     } else if (rank && tag) {
       obj = rank - 1;
       float minimum = data[0], maximum;
-      MPI_Recv(&maximum, 1, MPI_FLOAT, obj, 0, MPI_COMM_WORLD, &status);
+      MPI_Sendrecv(&minimum, 1, MPI_FLOAT, obj, 0, 
+                   &maximum, 1, MPI_FLOAT, obj, 0,
+                   MPI_COMM_WORLD, &status);
       flag = (maximum - minimum) > EPS;
-      MPI_Isend(&flag, 1, MPI_C_BOOL, obj, 0, MPI_COMM_WORLD, &request);
       
       if (flag) {
-        int l = 0, r = block_len - 1;
-        while (l < r) {
-          int mid = (l + r + 1) >> 1;
-          if ((data[mid] - maximum) < -EPS) l = mid;
-          else r = mid - 1;
-        }
+        MPI_Sendrecv(data, block_len, MPI_FLOAT, obj, 0,
+                     recv_data, block_size, MPI_FLOAT, obj, 0,
+                     MPI_COMM_WORLD, &status);
+        int recv_count;
+        MPI_Get_count(&status, MPI_FLOAT, &recv_count);
 
-        int count = r + 1;
-        MPI_Send(data, count, MPI_FLOAT, obj, 0, MPI_COMM_WORLD);
-        
-        MPI_Irecv(data, count, MPI_FLOAT, obj, 0, MPI_COMM_WORLD, &request);
+        merge_split(data, recv_data, tmp, block_len, recv_count, true);
       }
     }
 

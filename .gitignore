@@ -11,3 +11,6 @@
 .bashrc
 .bash_logout
 .lesshst
+.venv/
+.ipython/
+.local/

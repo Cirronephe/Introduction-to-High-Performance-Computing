@@ -101,49 +101,50 @@ __global__ void kernel_phase2_col(int p, int b, int n, int *graph) {
 }
 
 __global__ void kernel_phase3(int p, int b, int n, int *graph) {
+    const int TD = 2;
     int ty = threadIdx.y;
     int tx = threadIdx.x;
-    int i = blockIdx.y * blockDim.y * 4 + ty * 4;
-    int j = blockIdx.x * blockDim.x * 4 + tx * 4;
+    int i = blockIdx.y * blockDim.y * TD + ty * TD;
+    int j = blockIdx.x * blockDim.x * TD + tx * TD;
     
     if (i >= p * b) i += b;
     if (j >= p * b) j += b;
 
     __shared__ int shared_block[32][32], shared_pivot_row[32][32], shared_pivot_col[32][32];
     
-    for (int u = 0; u < 4; ++u)
+    for (int u = 0; u < TD; ++u)
         if (i + u < n)
-            for (int v = 0; v < 4; ++v)
-                if (p * b + tx * 4 + v < n)
-                    shared_pivot_row[ty * 4 + u][tx * 4 + v] = graph[(i + u) * n + p * b + tx * 4 + v];
-    for (int u = 0; u < 4; ++u)
-        if (p * b + ty * 4 + u < n)
-            for (int v = 0; v < 4; ++v)
+            for (int v = 0; v < TD; ++v)
+                if (p * b + tx * TD + v < n)
+                    shared_pivot_row[ty * TD + u][tx * TD + v] = graph[(i + u) * n + p * b + tx * TD + v];
+    for (int u = 0; u < TD; ++u)
+        if (p * b + ty * TD + u < n)
+            for (int v = 0; v < TD; ++v)
                 if (j + v < n)
-                    shared_pivot_col[ty * 4 + u][tx * 4 + v] = graph[(p * b + ty * 4 + u) * n + j + v];
-    for (int u = 0; u < 4; ++u)
+                    shared_pivot_col[ty * TD + u][tx * TD + v] = graph[(p * b + ty * TD + u) * n + j + v];
+    for (int u = 0; u < TD; ++u)
         if (i + u < n)
-            for (int v = 0; v < 4; ++v)
+            for (int v = 0; v < TD; ++v)
                 if (j + v < n)
-                    shared_block[ty * 4 + u][tx * 4 + v] = graph[(i + u) * n + j + v];
+                    shared_block[ty * TD + u][tx * TD + v] = graph[(i + u) * n + j + v];
     __syncthreads();
 
-    int reg_block[4][4];
+    int reg_block[TD][TD];
 
-    for (int u = 0; u < 4; ++u)
-        for (int v = 0; v < 4; ++v)
-            reg_block[u][v] = shared_block[ty * 4 + u][tx * 4 + v];
+    for (int u = 0; u < TD; ++u)
+        for (int v = 0; v < TD; ++v)
+            reg_block[u][v] = shared_block[ty * TD + u][tx * TD + v];
 
     int m = min(n - p * b, b);
     for (int k = 0; k < m; ++k) {
-        for (int u = 0; u < 4; ++u)
-            for (int v = 0; v < 4; ++v)
-                reg_block[u][v] = min(reg_block[u][v], shared_pivot_row[ty * 4 + u][k] + shared_pivot_col[k][tx * 4 + v]);
+        for (int u = 0; u < TD; ++u)
+            for (int v = 0; v < TD; ++v)
+                reg_block[u][v] = min(reg_block[u][v], shared_pivot_row[ty * TD + u][k] + shared_pivot_col[k][tx * TD + v]);
     }
     
-    for (int u = 0; u < 4; ++u)
+    for (int u = 0; u < TD; ++u)
         if (i + u < n)    
-            for (int v = 0; v < 4; ++v)
+            for (int v = 0; v < TD; ++v)
                 if (j + v < n)
                     graph[(i + u) * n + j + v] = reg_block[u][v];
 }
@@ -157,7 +158,7 @@ void apsp(int n, /* device */ int *graph) {
         kernel_phase1<<<dim3(1, 1), thr>>>(p, b, n, graph);
         kernel_phase2_row<<<dim3(m - 1, 1), thr>>>(p, b, n, graph);
         kernel_phase2_col<<<dim3(1, m - 1), thr>>>(p, b, n, graph);
-        kernel_phase3<<<dim3(m - 1, m - 1), dim3(8, 8)>>>(p, b, n, graph);
+        kernel_phase3<<<dim3(m - 1, m - 1), dim3(16, 16)>>>(p, b, n, graph);
     }
 }
 

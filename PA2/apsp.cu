@@ -25,7 +25,8 @@ __global__ void kernel_phase1(int p, int b, int n, int *graph) {
     }
     __syncthreads();
 
-    for (int k = 0; k < b && (p * b + k) < n; ++k) {
+    int m = min(n - p * b, b);
+    for (int k = 0; k < m; ++k) {
         shared_block[ty][tx] = min(shared_block[ty][tx], shared_block[ty][k] + shared_block[k][tx]);
         __syncthreads();
     }
@@ -56,7 +57,8 @@ __global__ void kernel_phase2_row(int p, int b, int n, int *graph) {
     }
     __syncthreads();
 
-    for (int k = 0; k < b && (p * b + k) < n; ++k) {
+    int m = min(n - p * b, b);
+    for (int k = 0; k < m; ++k) {
         shared_block[ty][tx] = min(shared_block[ty][tx], shared_pivot[ty][k] + shared_block[k][tx]);
         __syncthreads();
     }
@@ -87,7 +89,8 @@ __global__ void kernel_phase2_col(int p, int b, int n, int *graph) {
     }
     __syncthreads();
 
-    for (int k = 0; k < b && (p * b + k) < n; ++k) {
+    int m = min(n - p * b, b);
+    for (int k = 0; k < m; ++k) {
         shared_block[ty][tx] = min(shared_block[ty][tx], shared_block[ty][k] + shared_pivot[k][tx]);
         __syncthreads();
     }
@@ -122,7 +125,8 @@ __global__ void kernel_phase3(int p, int b, int n, int *graph) {
     }
     __syncthreads();
 
-    for (int k = 0; k < b && (p * b + k) < n; ++k) {
+    int m = min(n - p * b, b);
+    for (int k = 0; k < m; ++k) {
         shared_block[ty][tx] = min(shared_block[ty][tx], shared_pivot_row[ty][k] + shared_pivot_col[k][tx]);
     }
     

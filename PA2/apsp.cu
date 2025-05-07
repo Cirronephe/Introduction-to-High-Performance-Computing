@@ -129,8 +129,14 @@ __global__ void kernel_phase3(int p, int b, int n, int *graph) {
                     shared_block[ty * TD + u][tx * TD + v] = graph[(i + u) * n + j + v];
     __syncthreads();
 
-    int reg_block[TD][TD];
+    int reg_block[TD][TD], reg_pivot_row[TD][32], reg_pivot_col[32][TD];
 
+    for (int u = 0; u < TD; ++u)
+        for (int k = 0; k < 32; ++k)
+            reg_pivot_row[u][k] = shared_pivot_row[ty * TD + u][k];
+    for (int k = 0; k < 32; ++k)
+        for (int v = 0; v < TD; ++v)
+            reg_pivot_col[k][v] = shared_pivot_col[k][tx * TD + v];
     for (int u = 0; u < TD; ++u)
         for (int v = 0; v < TD; ++v)
             reg_block[u][v] = shared_block[ty * TD + u][tx * TD + v];
@@ -139,7 +145,7 @@ __global__ void kernel_phase3(int p, int b, int n, int *graph) {
     for (int k = 0; k < m; ++k) {
         for (int u = 0; u < TD; ++u)
             for (int v = 0; v < TD; ++v)
-                reg_block[u][v] = min(reg_block[u][v], shared_pivot_row[ty * TD + u][k] + shared_pivot_col[k][tx * TD + v]);
+                reg_block[u][v] = min(reg_block[u][v], reg_pivot_row[u][k] + reg_pivot_col[k][v]);
     }
     
     for (int u = 0; u < TD; ++u)

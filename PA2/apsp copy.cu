@@ -55,6 +55,7 @@ __global__ void kernel_phase1(int p, int b, int n, int *graph) {
 }
 
 __global__ void kernel_phase2_row(int p, int b, int n, int *graph) {
+    const int TD = 1;
     int ty = threadIdx.y * TD;
     int tx = threadIdx.x * TD;
     int i = p * b + ty;
@@ -62,8 +63,7 @@ __global__ void kernel_phase2_row(int p, int b, int n, int *graph) {
     
     if (j >= p * b) j += b;
 
-    __shared__ int shared_pivot[B][B];
-    int reg_block[TD][TD];
+    __shared__ int shared_block[B][B], shared_pivot[B][B];
 
     for (int u = 0; u < TD; ++u) {
         int pi = p * b + ty + u;
@@ -80,7 +80,7 @@ __global__ void kernel_phase2_row(int p, int b, int n, int *graph) {
             for (int v = 0; v < TD; ++v) {
                 int pj = j + v;
                 if (pj < n)
-                    reg_block[u][v] = graph[pi * n + pj];
+                    shared_block[ty + u][tx + v] = graph[pi * n + pj];
             }
     }
     __syncthreads();
@@ -90,8 +90,8 @@ __global__ void kernel_phase2_row(int p, int b, int n, int *graph) {
     for (int k = 0; k < m; ++k) {
         for (int u = 0; u < TD; ++u)
             for (int v = 0; v < TD; ++v)
-                if (j + v < n)
-                    reg_block[u][v] = min(reg_block[u][v], shared_pivot[ty + u][k] + graph[(p * b + k) * n + j + v]);
+                shared_block[ty + u][tx + v] = min(shared_block[ty + u][tx + v], shared_pivot[ty + u][k] + shared_block[k][tx + v]);
+        __syncthreads();
     }
     
     for (int u = 0; u < TD; ++u) {
@@ -100,12 +100,13 @@ __global__ void kernel_phase2_row(int p, int b, int n, int *graph) {
             for (int v = 0; v < TD; ++v) {
                 int pj = j + v;
                 if (pj < n)
-                    graph[pi * n + pj] = reg_block[u][v];
+                    graph[pi * n + pj] = shared_block[ty + u][tx + v];
             }
     }
 }
 
 __global__ void kernel_phase2_col(int p, int b, int n, int *graph) {
+    const int TD = 1;
     int ty = threadIdx.y * TD;
     int tx = threadIdx.x * TD;
     int i = blockIdx.y * blockDim.y * TD + ty;
@@ -113,8 +114,7 @@ __global__ void kernel_phase2_col(int p, int b, int n, int *graph) {
     
     if (i >= p * b) i += b;
 
-    __shared__ int shared_pivot[B][B];
-    int reg_block[TD][TD];
+    __shared__ int shared_block[B][B], shared_pivot[B][B];
 
     for (int u = 0; u < TD; ++u) {
         int pi = p * b + ty + u;
@@ -131,7 +131,7 @@ __global__ void kernel_phase2_col(int p, int b, int n, int *graph) {
             for (int v = 0; v < TD; ++v) {
                 int pj = j + v;
                 if (pj < n)
-                    reg_block[u][v] = graph[pi * n + pj];
+                    shared_block[ty + u][tx + v] = graph[pi * n + pj];
             }
     }
     __syncthreads();
@@ -140,9 +140,9 @@ __global__ void kernel_phase2_col(int p, int b, int n, int *graph) {
     #pragma unroll
     for (int k = 0; k < m; ++k) {
         for (int u = 0; u < TD; ++u)
-            if (i + u < n)
-                for (int v = 0; v < TD; ++v)
-                    reg_block[u][v] = min(reg_block[u][v], graph[(i + u) * n + p * b + k] + shared_pivot[k][tx + v]);
+            for (int v = 0; v < TD; ++v)
+                shared_block[ty + u][tx + v] = min(shared_block[ty + u][tx + v], shared_block[ty + u][k] + shared_pivot[k][tx + v]);
+        __syncthreads();
     }
     
     for (int u = 0; u < TD; ++u) {
@@ -151,7 +151,7 @@ __global__ void kernel_phase2_col(int p, int b, int n, int *graph) {
             for (int v = 0; v < TD; ++v) {
                 int pj = j + v;
                 if (pj < n)
-                    graph[pi * n + pj] = reg_block[u][v];
+                    graph[pi * n + pj] = shared_block[ty + u][tx + v];
             }
     }
 }
@@ -220,12 +220,12 @@ __global__ void kernel_phase3(int p, int b, int n, int *graph) {
 
 void apsp(int n, /* device */ int *graph) {
     int b = B, m = ceiling(n, b);
-    dim3 thr(B / TD, B / TD);
+    dim3 thr(B, B);
     for (int p = 0; p < m; ++p) {
-        kernel_phase1<<<dim3(1, 1), dim3(B, B)>>>(p, b, n, graph);
+        kernel_phase1<<<dim3(1, 1), thr>>>(p, b, n, graph);
         kernel_phase2_row<<<dim3(m - 1, 1), thr>>>(p, b, n, graph);
         kernel_phase2_col<<<dim3(1, m - 1), thr>>>(p, b, n, graph);
-        kernel_phase3<<<dim3(m - 1, m - 1), thr>>>(p, b, n, graph);
+        kernel_phase3<<<dim3(m - 1, m - 1), dim3(B / TD, B / TD)>>>(p, b, n, graph);
     }
 }
 

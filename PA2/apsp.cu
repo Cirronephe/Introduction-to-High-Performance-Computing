@@ -4,7 +4,8 @@
 
 #include "apsp.h"
 
-const int K = 32, B = 64, T = 2;
+const int K = 32, T = 2;
+int B = 64;
 
 template <typename T>
 inline T ceiling(T x, T y) {
@@ -13,13 +14,13 @@ inline T ceiling(T x, T y) {
 
 namespace {
 
-__global__ void kernel_phase1(int p, int n, int *graph) {
+__global__ void kernel_phase1(int p, int n, int *graph, int B) {
     int ty = threadIdx.y * T;
     int tx = threadIdx.x * T;
     int i = p * B + ty;
     int j = p * B + tx;
 
-    __shared__ int shared_block[B][B];
+    __shared__ int shared_block[64][64];
 
     #pragma unroll T
     for (int u = 0; u < T; ++u) {
@@ -59,7 +60,7 @@ __global__ void kernel_phase1(int p, int n, int *graph) {
     }
 }
 
-__global__ void kernel_phase2_row(int p, int n, int *graph) {
+__global__ void kernel_phase2_row(int p, int n, int *graph, int B) {
     int ty = threadIdx.y * T;
     int tx = threadIdx.x * T;
     int i = p * B + ty;
@@ -67,7 +68,7 @@ __global__ void kernel_phase2_row(int p, int n, int *graph) {
     
     if (blockIdx.x == p) return;
 
-    __shared__ int shared_pivot[B][B];
+    __shared__ int shared_pivot[64][64];
     int reg_block[T][T];
 
     #pragma unroll T
@@ -97,14 +98,13 @@ __global__ void kernel_phase2_row(int p, int n, int *graph) {
     int m = min(n - p * B, B);
 
     #pragma unroll K
-    for (int k = 0; k < m; ++k) {
+    for (int k = 0; k < m; ++k)
         #pragma unroll T
         for (int u = 0; u < T; ++u)
             #pragma unroll T
             for (int v = 0; v < T; ++v)
                 if (j + v < n)
                     reg_block[u][v] = min(reg_block[u][v], shared_pivot[ty + u][k] + graph[(p * B + k) * n + j + v]);
-    }
     
     #pragma unroll T
     for (int u = 0; u < T; ++u) {
@@ -119,7 +119,7 @@ __global__ void kernel_phase2_row(int p, int n, int *graph) {
     }
 }
 
-__global__ void kernel_phase2_col(int p, int n, int *graph) {
+__global__ void kernel_phase2_col(int p, int n, int *graph, int B) {
     int ty = threadIdx.y * T;
     int tx = threadIdx.x * T;
     int i = blockIdx.y * blockDim.y * T + ty;
@@ -127,7 +127,7 @@ __global__ void kernel_phase2_col(int p, int n, int *graph) {
     
     if (blockIdx.y == p) return;
 
-    __shared__ int shared_pivot[B][B];
+    __shared__ int shared_pivot[64][64];
     int reg_block[T][T];
 
     #pragma unroll T
@@ -179,7 +179,7 @@ __global__ void kernel_phase2_col(int p, int n, int *graph) {
     }
 }
 
-__global__ void kernel_phase3(int p, int n, int *graph) {
+__global__ void kernel_phase3(int p, int n, int *graph, int B) {
     int ty = threadIdx.y * T;
     int tx = threadIdx.x * T;
     int i = blockIdx.y * blockDim.y * T + ty;
@@ -188,7 +188,7 @@ __global__ void kernel_phase3(int p, int n, int *graph) {
     if (blockIdx.y == p) return;
     if (blockIdx.x == p) return;
 
-    __shared__ int shared_pivot_row[B][B], shared_pivot_col[B][B];
+    __shared__ int shared_pivot_row[64][64], shared_pivot_col[64][64];
     int reg_block[T][T];
     
     #pragma unroll T
@@ -255,14 +255,16 @@ __global__ void kernel_phase3(int p, int n, int *graph) {
 }
 
 void apsp(int n, /* device */ int *graph) {
+    if (n <= 1000) B = 32;
+
     int m = ceiling(n, B);
-    dim3 thr(B / T, B / T);
+    dim3 thr(B / T, B / T);    
 
     for (int p = 0; p < m; ++p) {
-        kernel_phase1<<<dim3(1, 1), thr>>>(p, n, graph);
-        kernel_phase2_row<<<dim3(m, 1), thr>>>(p, n, graph);
-        kernel_phase2_col<<<dim3(1, m), thr>>>(p, n, graph);
-        kernel_phase3<<<dim3(m, m), thr>>>(p, n, graph);
+        kernel_phase1<<<dim3(1, 1), thr>>>(p, n, graph, B);
+        kernel_phase2_row<<<dim3(m, 1), thr>>>(p, n, graph, B);
+        kernel_phase2_col<<<dim3(1, m), thr>>>(p, n, graph, B);
+        kernel_phase3<<<dim3(m, m), thr>>>(p, n, graph, B);
     }
 }
 

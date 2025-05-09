@@ -5,7 +5,7 @@
 #include "apsp.h"
 #include <cstdio>
 
-const int B = 32, TD = 2;
+const int B = 64, TD = 2;
 
 template <typename T>
 inline T ceiling(T x, T y) {
@@ -15,7 +15,6 @@ inline T ceiling(T x, T y) {
 namespace {
 
 __global__ void kernel_phase1(int p, int b, int n, int *graph) {
-    const int TD = 1;
     int ty = threadIdx.y * TD;
     int tx = threadIdx.x * TD;
     int i = p * b + ty;
@@ -60,7 +59,7 @@ __global__ void kernel_phase2_row(int p, int b, int n, int *graph) {
     int i = p * b + ty;
     int j = blockIdx.x * blockDim.x * TD + tx;
     
-    if (j >= p * b) j += b;
+    if (blockIdx.x == p) return;
 
     __shared__ int shared_pivot[B][B];
     int reg_block[TD][TD];
@@ -111,7 +110,7 @@ __global__ void kernel_phase2_col(int p, int b, int n, int *graph) {
     int i = blockIdx.y * blockDim.y * TD + ty;
     int j = p * b + tx;
     
-    if (i >= p * b) i += b;
+    if (blockIdx.y == p) return;
 
     __shared__ int shared_pivot[B][B];
     int reg_block[TD][TD];
@@ -162,8 +161,8 @@ __global__ void kernel_phase3(int p, int b, int n, int *graph) {
     int i = blockIdx.y * blockDim.y * TD + ty;
     int j = blockIdx.x * blockDim.x * TD + tx;
     
-    if (i >= p * b) i += b;
-    if (j >= p * b) j += b;
+    if (blockIdx.y == p) return;
+    if (blockIdx.x == p) return;
 
     __shared__ int shared_pivot_row[B][B], shared_pivot_col[B][B];
     int reg_block[TD][TD];
@@ -185,7 +184,7 @@ __global__ void kernel_phase3(int p, int b, int n, int *graph) {
                 if (pj < n)
                     shared_pivot_col[ty + u][tx + v] = graph[pi * n + pj];
             }
-    }
+    }    
     for (int u = 0; u < TD; ++u) {
         int pi = i + u;
         if (pi < n)
@@ -222,10 +221,10 @@ void apsp(int n, /* device */ int *graph) {
     int b = B, m = ceiling(n, b);
     dim3 thr(B / TD, B / TD);
     for (int p = 0; p < m; ++p) {
-        kernel_phase1<<<dim3(1, 1), dim3(B, B)>>>(p, b, n, graph);
-        kernel_phase2_row<<<dim3(m - 1, 1), thr>>>(p, b, n, graph);
-        kernel_phase2_col<<<dim3(1, m - 1), thr>>>(p, b, n, graph);
-        kernel_phase3<<<dim3(m - 1, m - 1), thr>>>(p, b, n, graph);
+        kernel_phase1<<<dim3(1, 1), thr>>>(p, b, n, graph);
+        kernel_phase2_row<<<dim3(m, 1), thr>>>(p, b, n, graph);
+        kernel_phase2_col<<<dim3(1, m), thr>>>(p, b, n, graph);
+        kernel_phase3<<<dim3(m, m), thr>>>(p, b, n, graph);
     }
 }
 

@@ -23,5 +23,6 @@ public:
 private:
     int num_target;
     int *target, *ptr_scheduled;
+    int *row;
 };
 #endif

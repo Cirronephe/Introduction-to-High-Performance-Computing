@@ -1,0 +1,117 @@
+Using CPUID GenuineIntel-6-4F-1
+DEBUGINFOD_URLS=
+Compression enabled, disabling build id collection at the end of the session.
+nr_cblocks: 0
+affinity: SYS
+mmap flush: 1
+comp level: 1
+mmap size 528384B
+Control descriptor is not initialized
+couldn't open /proc/1/task/1/maps
+couldn't open /proc/602/task/602/maps
+couldn't open /proc/641/task/641/maps
+couldn't open /proc/925/task/925/maps
+couldn't open /proc/932/task/932/maps
+couldn't open /proc/934/task/934/maps
+couldn't open /proc/945/task/945/maps
+couldn't open /proc/948/task/948/maps
+couldn't open /proc/961/task/961/maps
+couldn't open /proc/970/task/970/maps
+couldn't open /proc/983/task/983/maps
+couldn't open /proc/1119/task/1119/maps
+couldn't open /proc/1120/task/1120/maps
+couldn't open /proc/1124/task/1124/maps
+couldn't open /proc/1125/task/1125/maps
+couldn't open /proc/1126/task/1126/maps
+couldn't open /proc/1127/task/1127/maps
+couldn't open /proc/1141/task/1141/maps
+couldn't open /proc/1147/task/1147/maps
+couldn't open /proc/1175/task/1175/maps
+couldn't open /proc/3841291/task/3841291/maps
+couldn't open /proc/3841295/task/3841295/maps
+couldn't open /proc/3841298/task/3841298/maps
+couldn't open /proc/3841309/task/3841309/maps
+couldn't open /proc/3841379/task/3841379/maps
+couldn't open /proc/3841383/task/3841383/maps
+couldn't open /proc/3841386/task/3841386/maps
+couldn't open /proc/3841763/task/3841763/maps
+couldn't open /proc/3841764/task/3841764/maps
+
+3841803:perf-sync:ready:SYS=3684462852798584
+[ perf record: Woken up 1 times to write data ]
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+failed to write feature HYBRID_TOPOLOGY
+[ perf record: Captured and wrote 0.382 MB /home/course/hpc/users/2023010828/exp8/result_uarch.conv1/data.7/temp.dryrun.perf, compressed (original 0.039 MB, ratio is 5.557) ]

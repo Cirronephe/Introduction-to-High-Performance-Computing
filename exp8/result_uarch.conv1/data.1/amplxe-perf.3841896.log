@@ -1,0 +1,236 @@
+threads_spec: cpu
+Using CPUID GenuineIntel-6-4F-1
+DEBUGINFOD_URLS=
+Compression enabled, disabling build id collection at the end of the session.
+nr_threads: 28
+thread_masks[0]: 0x5608b52d0bb0: maps mask[28]: 0
+thread_masks[0]: 0x5608b52d0bc0: affinity mask[28]: 0
+thread_masks[1]: 0x5608b52d0bd0: maps mask[28]: 1
+thread_masks[1]: 0x5608b52d0be0: affinity mask[28]: 1
+thread_masks[2]: 0x5608b52d0bf0: maps mask[28]: 2
+thread_masks[2]: 0x5608b52d0c00: affinity mask[28]: 2
+thread_masks[3]: 0x5608b52d0c10: maps mask[28]: 3
+thread_masks[3]: 0x5608b52d0c20: affinity mask[28]: 3
+thread_masks[4]: 0x5608b52d0c30: maps mask[28]: 4
+thread_masks[4]: 0x5608b52d0c40: affinity mask[28]: 4
+thread_masks[5]: 0x5608b52d0c50: maps mask[28]: 5
+thread_masks[5]: 0x5608b52d0c60: affinity mask[28]: 5
+thread_masks[6]: 0x5608b52d0c70: maps mask[28]: 6
+thread_masks[6]: 0x5608b52d0c80: affinity mask[28]: 6
+thread_masks[7]: 0x5608b52d0c90: maps mask[28]: 7
+thread_masks[7]: 0x5608b52d0ca0: affinity mask[28]: 7
+thread_masks[8]: 0x5608b52d0cb0: maps mask[28]: 8
+thread_masks[8]: 0x5608b52d0cc0: affinity mask[28]: 8
+thread_masks[9]: 0x5608b52d0cd0: maps mask[28]: 9
+thread_masks[9]: 0x5608b52d0ce0: affinity mask[28]: 9
+thread_masks[10]: 0x5608b52d0cf0: maps mask[28]: 10
+thread_masks[10]: 0x5608b52d0d00: affinity mask[28]: 10
+thread_masks[11]: 0x5608b52d0d10: maps mask[28]: 11
+thread_masks[11]: 0x5608b52d0d20: affinity mask[28]: 11
+thread_masks[12]: 0x5608b52d0d30: maps mask[28]: 12
+thread_masks[12]: 0x5608b52d0d40: affinity mask[28]: 12
+thread_masks[13]: 0x5608b52d0d50: maps mask[28]: 13
+thread_masks[13]: 0x5608b52d0d60: affinity mask[28]: 13
+thread_masks[14]: 0x5608b52d0d70: maps mask[28]: 14
+thread_masks[14]: 0x5608b52d0d80: affinity mask[28]: 14
+thread_masks[15]: 0x5608b52d0d90: maps mask[28]: 15
+thread_masks[15]: 0x5608b52d0da0: affinity mask[28]: 15
+thread_masks[16]: 0x5608b52d0db0: maps mask[28]: 16
+thread_masks[16]: 0x5608b52d0dc0: affinity mask[28]: 16
+thread_masks[17]: 0x5608b52d0dd0: maps mask[28]: 17
+thread_masks[17]: 0x5608b52d0de0: affinity mask[28]: 17
+thread_masks[18]: 0x5608b52d0df0: maps mask[28]: 18
+thread_masks[18]: 0x5608b52d0e00: affinity mask[28]: 18
+thread_masks[19]: 0x5608b52d0e10: maps mask[28]: 19
+thread_masks[19]: 0x5608b52d0e20: affinity mask[28]: 19
+thread_masks[20]: 0x5608b52d0e30: maps mask[28]: 20
+thread_masks[20]: 0x5608b52d0e40: affinity mask[28]: 20
+thread_masks[21]: 0x5608b52d0e50: maps mask[28]: 21
+thread_masks[21]: 0x5608b52d0e60: affinity mask[28]: 21
+thread_masks[22]: 0x5608b52d0e70: maps mask[28]: 22
+thread_masks[22]: 0x5608b52d0e80: affinity mask[28]: 22
+thread_masks[23]: 0x5608b52d0e90: maps mask[28]: 23
+thread_masks[23]: 0x5608b52d0ea0: affinity mask[28]: 23
+thread_masks[24]: 0x5608b52d0eb0: maps mask[28]: 24
+thread_masks[24]: 0x5608b52d0ec0: affinity mask[28]: 24
+thread_masks[25]: 0x5608b52d0ed0: maps mask[28]: 25
+thread_masks[25]: 0x5608b52d0ee0: affinity mask[28]: 25
+thread_masks[26]: 0x5608b52d0ef0: maps mask[28]: 26
+thread_masks[26]: 0x5608b52d0f00: affinity mask[28]: 26
+thread_masks[27]: 0x5608b52d0f10: maps mask[28]: 27
+thread_masks[27]: 0x5608b52d0f20: affinity mask[28]: 27
+nr_cblocks: 0
+affinity: SYS
+mmap flush: 1
+comp level: 1
+mmap size 528384B
+couldn't open /proc/1/task/1/maps
+couldn't open /proc/602/task/602/maps
+couldn't open /proc/641/task/641/maps
+couldn't open /proc/925/task/925/maps
+couldn't open /proc/932/task/932/maps
+couldn't open /proc/934/task/934/maps
+couldn't open /proc/945/task/945/maps
+couldn't open /proc/948/task/948/maps
+couldn't open /proc/961/task/961/maps
+couldn't open /proc/970/task/970/maps
+couldn't open /proc/983/task/983/maps
+couldn't open /proc/1119/task/1119/maps
+couldn't open /proc/1120/task/1120/maps
+couldn't open /proc/1124/task/1124/maps
+couldn't open /proc/1125/task/1125/maps
+couldn't open /proc/1126/task/1126/maps
+couldn't open /proc/1127/task/1127/maps
+couldn't open /proc/1141/task/1141/maps
+couldn't open /proc/1147/task/1147/maps
+couldn't open /proc/1175/task/1175/maps
+couldn't open /proc/3841291/task/3841291/maps
+couldn't open /proc/3841295/task/3841295/maps
+couldn't open /proc/3841298/task/3841298/maps
+couldn't open /proc/3841309/task/3841309/maps
+couldn't open /proc/3841379/task/3841379/maps
+couldn't open /proc/3841383/task/3841383/maps
+couldn't open /proc/3841386/task/3841386/maps
+couldn't open /proc/3841763/task/3841763/maps
+couldn't open /proc/3841764/task/3841764/maps
+threads[3841953]: started on cpu1
+threads[3841956]: started on cpu2
+threads[3841957]: started on cpu3
+threads[3841958]: started on cpu4
+threads[3841966]: started on cpu5
+threads[3841970]: started on cpu6
+threads[3841976]: started on cpu7
+threads[3841979]: started on cpu8
+threads[3841983]: started on cpu9
+threads[3841992]: started on cpu10
+threads[3841996]: started on cpu11
+threads[3842000]: started on cpu12
+threads[3842004]: started on cpu13
+threads[3842009]: started on cpu14
+threads[3842014]: started on cpu15
+threads[3842020]: started on cpu16
+threads[3842027]: started on cpu17
+threads[3842031]: started on cpu18
+threads[3842036]: started on cpu19
+threads[3842040]: started on cpu20
+threads[3842044]: started on cpu21
+threads[3842048]: started on cpu22
+threads[3842053]: started on cpu23
+threads[3842057]: started on cpu24
+threads[3842061]: started on cpu25
+threads[3842064]: started on cpu26
+threads[3842067]: started on cpu27
+threads[3841896]: started on cpu0
+
+3841939:perf-sync:ready:SYS=3684466687226803
+[ perf record: Woken up 99 times to write data ]
+threads[3841896]: samples=2, wakes=1, transferred=244208, compressed=21688
+threads[3841953]: samples=1, wakes=2, transferred=98512, compressed=9824
+threads[3841956]: samples=2, wakes=2, transferred=143680, compressed=15358
+threads[3841957]: samples=12, wakes=7, transferred=1387984, compressed=132253
+threads[3841958]: samples=10, wakes=7, transferred=1382080, compressed=131164
+threads[3841966]: samples=2, wakes=2, transferred=146112, compressed=15748
+threads[3841970]: samples=2, wakes=2, transferred=144576, compressed=15214
+threads[3841976]: samples=1, wakes=2, transferred=96944, compressed=10102
+threads[3841979]: samples=2, wakes=2, transferred=138928, compressed=15028
+threads[3841983]: samples=17, wakes=13, transferred=2970768, compressed=223851
+threads[3841992]: samples=18, wakes=13, transferred=3011400, compressed=220322
+threads[3841996]: samples=17, wakes=13, transferred=2984312, compressed=220997
+threads[3842000]: samples=17, wakes=13, transferred=2935144, compressed=214802
+threads[3842004]: samples=17, wakes=13, transferred=2955712, compressed=218775
+threads[3842009]: samples=17, wakes=13, transferred=2935752, compressed=218493
+threads[3842014]: samples=17, wakes=13, transferred=2962176, compressed=218380
+threads[3842020]: samples=17, wakes=13, transferred=2948632, compressed=219823
+threads[3842027]: samples=1, wakes=2, transferred=48752, compressed=6489
+threads[3842031]: samples=1, wakes=2, transferred=6656, compressed=1206
+threads[3842036]: samples=1, wakes=2, transferred=9640, compressed=1588
+threads[3842040]: samples=1, wakes=2, transferred=12480, compressed=1778
+threads[3842044]: samples=1, wakes=2, transferred=800, compressed=311
+threads[3842048]: samples=1, wakes=2, transferred=3168, compressed=467
+threads[3842053]: samples=1, wakes=2, transferred=3424, compressed=582
+threads[3842057]: samples=0, wakes=2, written=0
+threads[3842061]: samples=1, wakes=2, transferred=18936, compressed=2562
+threads[3842064]: samples=1, wakes=2, transferred=12416, compressed=1829
+threads[3842067]: samples=1, wakes=2, transferred=18384, compressed=2600
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+read LOST count failed
+failed to write feature HYBRID_TOPOLOGY
+[ perf record: Captured and wrote 3.264 MB /home/course/hpc/users/2023010828/exp8/result_uarch.conv1/data.1/system-wide.perf, compressed (original 26.342 MB, ratio is 12.900) ]

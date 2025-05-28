@@ -2,6 +2,15 @@
 #define SpMM_OPT_H
 #include "spmm_base.h"
 
+const int B = 32;
+
+struct Tuple {
+    int row;
+    int count;
+    int idx[B];
+    float val[B];
+};
+
 class SpMMOpt : public SpMM
 {
 public:
@@ -14,6 +23,10 @@ public:
         if (p_vin) checkCudaErrors(cudaFree(p_vin));
     }
      
+    std::vector<Tuple> splitCSRToTuples();
+
+    void uploadTuplesToGPU(const std::vector<Tuple> &hostTuples);
+
     virtual void preprocess(float *vin, float *vout);
 
     virtual void run(float *vin, float *vout);
@@ -33,6 +46,8 @@ private:
     std::vector<int> new_to_old;
     int *d_new_to_old;
     float *p_vin;
+    Tuple *d_tuples;
+    int tuple_count;
 
     int num_target;
     int *target, *ptr_scheduled;

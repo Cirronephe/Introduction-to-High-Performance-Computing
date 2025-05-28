@@ -1,43 +1,36 @@
 #include "spmm_opt.h"
 
-const int BLOCK_SIZE = 128, THREAD_SIZE = 2;
+const int BLOCK_SIZE = 128, WARP_SIZE = 32;
 
-__global__ void spmm_kernel_placeholder(int *ptr, int *idx, float *val, float *vin, float *vout, int num_v, int INFEATURE)
+__global__ void spmm_kernel(int *ptr, int *idx, float *val, float *vin, float *vout, int num_v, int feat_in, int THREAD_SIZE)
 {
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int begin = tid * THREAD_SIZE, end = min((tid + 1) * THREAD_SIZE, ptr[num_v]);
+    int warp_id = (blockIdx.x * blockDim.x + threadIdx.x) / WARP_SIZE;
+    int lane_id = threadIdx.x % WARP_SIZE;
 
-    if (begin >= end) return;
+    if (warp_id >= num_v) return;
 
-    int l = 0, r = num_v;
+    int row_begin = ptr[warp_id], row_end = ptr[warp_id + 1];
+    int feat_begin = THREAD_SIZE * lane_id, feat_end = min(THREAD_SIZE * (lane_id + 1), feat_in);
 
-    while (l < r) {
-        int mid = (l + r + 1) >> 1;
-        if (begin >= ptr[mid]) l = mid;
-        else r = mid - 1;
-    }    
+    if (feat_begin >= feat_end) return;
 
-    for (int j = 0; j < INFEATURE; ++j) {
+    for (int j = feat_begin; j < feat_end; ++j) {
         float result = 0.0f;
-        int k = l;
-        for (int i = begin; i < end; ++i) {
-            if (i >= ptr[k + 1]) {
-                atomicAdd(&vout[k * INFEATURE + j], result);
-                result = 0.0f;
-                while (i >= ptr[k + 1]) ++k;
-            }
-            result += vin[idx[i] * INFEATURE + j] * val[i];
+        for (int i = row_begin; i < row_end; ++i) {
+            result +=  vin[idx[i] * feat_in + j] * val[i];
         }
-        atomicAdd(&vout[k * INFEATURE + j], result);
+        vout[warp_id * feat_in + j] = result;
     }
 }
+
 void SpMMOpt::preprocess(float *vin, float *vout)
 {
-    grid.x = (num_e + BLOCK_SIZE * THREAD_SIZE - 1) / (BLOCK_SIZE * THREAD_SIZE);
+    grid.x = (num_v + BLOCK_SIZE / WARP_SIZE - 1) / (BLOCK_SIZE / WARP_SIZE);
     block.x = BLOCK_SIZE;
 }
 
 void SpMMOpt::run(float *vin, float *vout)
 {
-    spmm_kernel_placeholder<<<grid, block>>>(d_ptr, d_idx, d_val, vin, vout, num_v, feat_in);
+    const int THREAD_SIZE = (feat_in + WARP_SIZE - 1) / WARP_SIZE;
+    spmm_kernel<<<grid, block>>>(d_ptr, d_idx, d_val, vin, vout, num_v, feat_in, THREAD_SIZE);
 }

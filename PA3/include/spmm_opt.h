@@ -10,17 +10,28 @@ public:
     ~SpMMOpt() {
         if (target) checkCudaErrors(cudaFree(target));
         if (ptr_scheduled) checkCudaErrors(cudaFree(ptr_scheduled));
+        if (p_vin) checkCudaErrors(cudaFree(p_vin));
     }
      
     virtual void preprocess(float *vin, float *vout);
 
     virtual void run(float *vin, float *vout);
 
+    void write_metis_graph(const std::string& filename);
+
+    void read_metis_part(float *vin, const std::string& filename);
+
+    void rotate_vout(float *vout);
+
     void edgesort();
 
     void neighbor_grouping(int neighbor_num);
 
 private:
+    std::vector<int> old_to_new;
+    std::vector<int> new_to_old;
+    float *p_vin;
+
     int num_target;
     int *target, *ptr_scheduled;
 };

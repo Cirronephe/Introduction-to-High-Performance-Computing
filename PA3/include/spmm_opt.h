@@ -10,6 +10,7 @@ public:
     ~SpMMOpt() {
         if (target) checkCudaErrors(cudaFree(target));
         if (ptr_scheduled) checkCudaErrors(cudaFree(ptr_scheduled));
+        if (d_new_to_old) checkCudaErrors(cudaFree(d_new_to_old));
         if (p_vin) checkCudaErrors(cudaFree(p_vin));
     }
      
@@ -21,7 +22,7 @@ public:
 
     void read_metis_part(float *vin, const std::string& filename);
 
-    void rotate_vout(float *vout);
+    void reorder_vout(float *vout);
 
     void edgesort();
 
@@ -30,6 +31,7 @@ public:
 private:
     std::vector<int> old_to_new;
     std::vector<int> new_to_old;
+    int *d_new_to_old;
     float *p_vin;
 
     int num_target;

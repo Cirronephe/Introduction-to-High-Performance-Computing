@@ -6,7 +6,7 @@
 
 const int BLOCK_SIZE = 128, WARP_SIZE = 32;
 
-__global__ void spmm_kernel(int *ptr, int *idx, float *val, float *vin, float *vout, int num_v, int feat_in)
+__global__ void spmm_kernel(int *ptr, int *idx, float *val, float *vin, float *vout, int num_v, int feat_in, int *new_to_old)
 {
     int warp_id = (blockIdx.x * blockDim.x + threadIdx.x) / WARP_SIZE;
     int lane_id = threadIdx.x % WARP_SIZE;
@@ -20,7 +20,7 @@ __global__ void spmm_kernel(int *ptr, int *idx, float *val, float *vin, float *v
         for (int i = row_begin; i < row_end; ++i) {
             result +=  vin[idx[i] * feat_in + j] * val[i];
         }
-        vout[warp_id * feat_in + j] = result;
+        vout[new_to_old[warp_id] * feat_in + j] = result;
     }
 }
 
@@ -74,8 +74,7 @@ void SpMMOpt::read_metis_part(float *vin, const std::string& filename) {
     for (int i = 0; i < num_v; ++i) vertex_ids[i] = i;
 
     std::sort(vertex_ids.begin(), vertex_ids.end(), [&](int a, int b) {
-        if (part[a] != part[b]) return part[a] < part[b];
-        return a < b;
+        return part[a] < part[b];
     });
 
     old_to_new.resize(num_v);
@@ -85,6 +84,8 @@ void SpMMOpt::read_metis_part(float *vin, const std::string& filename) {
         old_to_new[old_id] = new_id;
         new_to_old[new_id] = old_id;
     }
+    cudaMalloc(&d_new_to_old, num_v * sizeof(int));
+    cudaMemcpy(d_new_to_old, new_to_old.data(), num_v * sizeof(int), cudaMemcpyHostToDevice);
 
     std::vector<int> n_ptr;
     std::vector<int> n_idx;
@@ -128,30 +129,11 @@ void SpMMOpt::read_metis_part(float *vin, const std::string& filename) {
         }
     }
 
-    cudaMalloc((void**)&p_vin, num_v * feat_in * sizeof(float));
+    cudaMalloc(&p_vin, num_v * feat_in * sizeof(float));
     cudaMemcpy(p_vin, n_vin, num_v * feat_in * sizeof(float), cudaMemcpyHostToDevice);
 
     delete[] h_vin;
     delete[] n_vin;
-}
-
-void SpMMOpt::rotate_vout(float *vout) {
-    float *h_vout = new float[num_v * feat_in];
-    float *n_vout = new float[num_v * feat_in];
-
-    cudaMemcpy(h_vout, vout, num_v * feat_in * sizeof(float), cudaMemcpyDeviceToHost);
-
-    for (int new_v = 0; new_v < num_v; ++new_v) {
-        int old_v = new_to_old[new_v];
-        for (int j = 0; j < feat_in; ++j) {
-            n_vout[old_v * feat_in + j] = h_vout[new_v * feat_in + j];
-        }
-    }
-
-    cudaMemcpy(vout, n_vout, num_v * feat_in * sizeof(float), cudaMemcpyHostToDevice);
-
-    delete[] h_vout;
-    delete[] n_vout;
 }
 
 void SpMMOpt::preprocess(float *vin, float *vout) {
@@ -163,6 +145,5 @@ void SpMMOpt::preprocess(float *vin, float *vout) {
 
 void SpMMOpt::run(float *vin, float *vout)
 {
-    spmm_kernel<<<grid, block>>>(d_ptr, d_idx, d_val, p_vin, vout, num_v, feat_in);
-    // rotate_vout(vout);
+    spmm_kernel<<<grid, block>>>(d_ptr, d_idx, d_val, p_vin, vout, num_v, feat_in, d_new_to_old);
 }
